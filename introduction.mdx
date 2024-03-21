@@ -3,69 +3,182 @@ title: Introduction
 description: 'Welcome to the home of your new documentation'
 ---
 
-<img
-  className="block dark:hidden"
-  src="/images/hero-light.svg"
-  alt="Hero Light"
-/>
-<img
-  className="hidden dark:block"
-  src="/images/hero-dark.svg"
-  alt="Hero Dark"
-/>
+# 🐣 Chat Messaging API
 
-## Setting up
+## 1. **Link sdk**
 
-The first step to world-class documentation is setting up your editing environments.
+* Download and register package
 
-<CardGroup cols={2}>
-  <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
-  >
-    Get your docs set up locally for easy development
-  </Card>
-  <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
-  >
-    Preview your changes before you push to make sure they're perfect
-  </Card>
-</CardGroup>
+```bash
+git clone https://gitlab.com/Hoangbim/openchat-js.git
+cd openchat-js
+yarn
+yarn link
+```
 
-## Make it yours
+* In your project run `yarn link stream-chat`
 
-Update your docs to your brand and add valuable content for the best user conversion.
+## 2. Login
 
-<CardGroup cols={2}>
-  <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
-  >
-    Customize your docs to your company's colors and brands
-  </Card>
-  <Card
-    title="Reference APIs"
-    icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
-  >
-    Automatically generate endpoints from an OpenAPI spec
-  </Card>
-  <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/components/accordion"
-  >
-    Build interactive features and designs to guide your users
-  </Card>
-  <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/customers"
-  >
-    Check out our showcase of our favorite documentation
-  </Card>
-</CardGroup>
+* Ok, so we're going to build a Messaging style chat. Let's get started by get the token for the sdk client to connect to server.
+* Use this api \[DOMAIN]/login/:user\_id
+* Use any user id for this demo and respose will return JWT token in this form
+
+```json
+{
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidmluaCIsImV4cCI6MTAwMDAwMDAwMDB9.t7-sbxaSfHSYZkSGXuVf2frPIQbAT01gzvFSBhOGl5U"
+}
+```
+
+## 3. Setup a connection
+
+* We got JWT token from Step 1, now we can use to connecting to Stream
+
+```javascript
+import {StreamChat} from 'stream-chat';
+const client = StreamChat.getInstance("dz5f4d5kzrue");
+client.connectUser({
+  id: "old-sunset-2",
+  name: "old",
+  image: "https://bit.ly/2u9Vc0r",
+}, "Bearer [JWT]");
+```
+
+* StreamChat.getInstance function always returns the same Client instance to avoid issues raised by multiple Client and WS connections. After the first call, the client configuration will not change if the key or options parameters change
+
+## 4.1 Create a Channel
+
+* With the client set up, you'll want to create a channel with members:
+
+```javascript
+const channel = client.channel('team', 'P-yMXmwnBP', {
+      name: "Private Chat About the Kingdom",
+      image: "https://bit.ly/2F3KEoM",
+      members: ["old-sunset-2]"
+});
+await channel.watch();
+          
+```
+
+* On this example, the first argument is the channel type. Different channel types can have different features enabled and different permissions.
+* The second argument is the ID of the conversation – it is optional, if you leave it out we will generate an ID based on the list of members.
+* The third argument is an object with all the data for this channel. You can use this to store any custom metadata about this channel.
+
+## **4.2 Connect to existed channel**
+
+```javascript
+const channel = client.channel("team", "HELLO");
+await channel.watch()
+```
+
+* This example show case how to connect to existed channel using channel type & channel\_id
+* Note: channel.watch() retrieves the current channel state (messages, members, read events etc.) and also ensures your current WebSocket connection listens to changes on this channel.
+
+## 5. Send a Message
+
+* Now that we have a channel up and runnning you can add a message to the channel
+
+```javascript
+const message = await channel.sendMessage({
+  text: "Hello, world!",
+});
+
+return message;
+
+```
+
+* The first field of payload is message Id, must be unique
+* The second field is the message text, can be any string
+
+## 6. State & Listen to Events
+
+* We can listen to channel event `message.new` when other user send to the channel
+
+```javascript
+channel.on("message.new", event => {
+  logEvent(event);
+});
+
+await channel.sendMessage({
+  text: "What is the medieval equivalent of tabs vs spaces?",
+});
+```
+
+* The incoming event will be look something like this JSON
+
+```json
+{
+  "type": "message.new",
+  "cid": "messaging:the-small-council_ftfm_djiT9",
+  "channel_id": "the-small-council_ftfm_djiT9",
+  "channel_type": "messaging",
+  "message": {
+    "id": "bff52c99-49b0-410c-995c-c75a84db9109",
+    "text": "what is the medieval equivalent of tabs vs spaces?",
+    "html": "<p>what is the medieval equivalent of tabs vs spaces?</p>\n",
+    "type": "regular",
+    "user": {
+      "id": "spring-sun-2",
+      "role": "user",
+      "created_at": "2021-02-23T16:39:26.289216Z",
+      "updated_at": "2023-05-29T10:31:29.293097Z",
+      "last_active": "2024-03-19T06:48:19.496297537Z",
+      "banned": false,
+      "online": true,
+      "color": "#5096ff",
+      "image": "https://bit.ly/2u9Vc0r",
+      "title": "System Architect",
+      "userRole": "default",
+      "name": "spring"
+    },
+    "attachments": [],
+    "latest_reactions": [],
+    "own_reactions": [],
+    "reaction_counts": {},
+    "reaction_scores": {},
+    "reply_count": 0,
+    "deleted_reply_count": 0,
+    "cid": "messaging:the-small-council_ftfm_djiT9",
+    "created_at": "2024-03-19T07:01:24.51858Z",
+    "updated_at": "2024-03-19T07:01:24.51858Z",
+    "shadowed": false,
+    "mentioned_users": [],
+    "silent": false,
+    "pinned": false,
+    "pinned_at": null,
+    "pinned_by": null,
+    "pin_expires": null
+  },
+  "user": {
+    "id": "spring-sun-2",
+    "role": "user",
+    "created_at": "2021-02-23T16:39:26.289216Z",
+    "updated_at": "2023-05-29T10:31:29.293097Z",
+    "last_active": "2024-03-19T06:48:19.496297537Z",
+    "banned": false,
+    "online": true,
+    "title": "System Architect",
+    "userRole": "default",
+    "name": "spring",
+    "color": "#5096ff",
+    "image": "https://bit.ly/2u9Vc0r"
+  },
+  "watcher_count": 1,
+  "created_at": "2024-03-19T07:01:24.530566567Z",
+  "received_at": "2024-03-19T07:01:24.587Z"
+}
+```
+
+## 7. Typing Event
+
+* Call sendEvent typing, there are 2 typing event: "typing.start" and "typing.stop"
+
+```javascript
+channel.watch().then(() => {
+   channel.sendEvent({
+      type: "typing.start",
+   }).then((res) => {
+      console.log("-----------res tying-----------", res);
+   });
+});
+```
