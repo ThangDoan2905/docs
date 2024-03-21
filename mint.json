@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Starter Kit",
+  "name": "Chat SDK Document",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -18,7 +18,7 @@
 
   "navigation": [
     {
-      "group": "Get Started",
+      "group": "Chat Messaging API",
       "pages": [
         "introduction"
       ]
