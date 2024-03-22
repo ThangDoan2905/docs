@@ -5,18 +5,9 @@ description: 'Welcome to the home of your new documentation'
 
 # 🐣 Chat Messaging API
 
-## 1. **Link sdk**
+## 1. **Install open-chat-js SDK**
 
-* Download and register package
-
-```bash
-git clone https://gitlab.com/Hoangbim/openchat-js.git
-cd openchat-js
-yarn
-yarn link
-```
-
-* In your project run `yarn link stream-chat`
+* In your project run `yarn add open-chat-js` or `npm install open-chat-js` with npm
 
 ## 2. Login
 
@@ -32,10 +23,10 @@ yarn link
 
 ## 3. Setup a connection
 
-* We got JWT token from Step 1, now we can use to connecting to Stream
+* Ok, so we're going to build a Messaging style chat. Let's get started by connecting to Stream
 
 ```javascript
-import {StreamChat} from 'stream-chat';
+import {StreamChat} from 'open-chat-js';
 const client = StreamChat.getInstance("dz5f4d5kzrue");
 client.connectUser({
   id: "old-sunset-2",
