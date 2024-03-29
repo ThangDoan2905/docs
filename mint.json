@@ -11,10 +11,9 @@
       "to": "#07C983"
     }
   },
-
   "navigation": [
     {
-      "group": "Chat Messaging API",
+      "group": "Belo Messaging API",
       "pages": [
         "introduction"
       ]

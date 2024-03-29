@@ -2,30 +2,89 @@
 title: Introduction
 ---
 
-# 🐣 Chat Messaging API
+# 🐣 Belo Messaging API
 
-## 1. **Install open-chat-js SDK**
+## 1. **Install belo-js-sdk SDK**
 
-* In your project run `yarn add open-chat-js` or `npm install open-chat-js` with npm
+* In your project run `yarn add belo-js-sdk` or `npm install belo-js-sdk` with npm
 
-## 2. Login
-
-* Ok, so we're going to build a Messaging style chat. Let's get started by get the token for the sdk client to connect to server.
-* Use this api \[DOMAIN]/login/:user\_id
-* Use any user id for this demo and respose will return JWT token in this form
+## 2. Register
+* First, create acount with user_id,user_name and password,
+* Use this endpoint: \[DOMAIN]/register
+* Request body example: 
+```json 
+{
+    "user_id": "belodemo",
+    "user_name": "belodemo",
+    "password": "belodemo123"
+}
+```
+* Response 
 
 ```json
 {
     "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidmluaCIsImV4cCI6MTAwMDAwMDAwMDB9.t7-sbxaSfHSYZkSGXuVf2frPIQbAT01gzvFSBhOGl5U"
 }
 ```
+* Error if user exist 
 
-## 3. Setup a connection
+```json
+{
+    "code": 400,
+    "message": "User already exists"
+}
+```
+
+
+* Ensure that the user_id and user_name are unique identifiers for each user.
+* Passwords should be securely hashed before storing them in the database.
+* Always use HTTPS to ensure secure communication between the client and server.
+* Handle errors gracefully and provide descriptive error messages for ease of troubleshooting.
+
+
+
+## 3. Login
+
+* Ok, so we're going to build a Messaging style chat. Let's get started by get the token for the sdk client to connect to server.
+* Use this enpoint: \[DOMAIN]/login
+* Request body:
+```json
+{
+    "user_id": "belodemo",
+    "password": "belodemo123"
+}
+```
+* Reponse
+
+```json
+{
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidmluaCIsImV4cCI6MTAwMDAwMDAwMDB9.t7-sbxaSfHSYZkSGXuVf2frPIQbAT01gzvFSBhOGl5U"
+}
+```
+* Error
+
+```json
+{
+    "code": 400,
+    "message": "User is not exists"
+}
+```
+
+```json
+{
+    "code": 400,
+    "message": "Invalid password"
+}
+```
+
+
+
+## 4. Setup a connection
 
 * Ok, so we're going to build a Messaging style chat. Let's get started by connecting to Stream
 
 ```javascript
-import {StreamChat} from 'open-chat-js';
+import {StreamChat} from 'belo-js-sdk';
 const client = StreamChat.getInstance("dz5f4d5kzrue");
 client.connectUser({
   id: "old-sunset-2",
@@ -36,7 +95,7 @@ client.connectUser({
 
 * StreamChat.getInstance function always returns the same Client instance to avoid issues raised by multiple Client and WS connections. After the first call, the client configuration will not change if the key or options parameters change
 
-## 4.1 Create a Channel
+## 5.1 Create a Channel
 
 * With the client set up, you'll want to create a channel with members:
 
@@ -54,7 +113,7 @@ await channel.watch();
 * The second argument is the ID of the conversation – it is optional, if you leave it out we will generate an ID based on the list of members.
 * The third argument is an object with all the data for this channel. You can use this to store any custom metadata about this channel.
 
-## **4.2 Connect to existed channel**
+## **5.2 Connect to existed channel**
 
 ```javascript
 const channel = client.channel("team", "HELLO");
@@ -64,13 +123,16 @@ await channel.watch()
 * This example show case how to connect to existed channel using channel type & channel\_id
 * Note: channel.watch() retrieves the current channel state (messages, members, read events etc.) and also ensures your current WebSocket connection listens to changes on this channel.
 
-## 5. Send a Message
+## 6. Send a Message
 
 * Now that we have a channel up and runnning you can add a message to the channel
 
 ```javascript
 const message = await channel.sendMessage({
-  text: "Hello, world!",
+  id: "random-id",
+  text: "Hello World!",
+  mentioned_users: [],
+  attachments: [],
 });
 
 return message;
@@ -79,8 +141,9 @@ return message;
 
 * The first field of payload is message Id, must be unique
 * The second field is the message text, can be any string
+* 
 
-## 6. State & Listen to Events
+## 7. State & Listen to Events
 
 * We can listen to channel event `message.new` when other user send to the channel
 
@@ -159,7 +222,7 @@ await channel.sendMessage({
 }
 ```
 
-## 7. Typing Event
+## 8. Typing Event
 
 * Call sendEvent typing, there are 2 typing event: "typing.start" and "typing.stop"
 
