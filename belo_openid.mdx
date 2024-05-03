@@ -1,0 +1,129 @@
+---
+title: Introduction 
+---
+
+# 🐣 Belo Oauth for oauth
+
+# Belo Oauth OIDC identity service
+
+
+## What is this?
+
+Belo Oauth is a microservice performing OIDC-like registration/sign-in with a web3 wallet and social network.
+
+
+## How does it work?
+
+![Sequence Diagram](./images/beloopenid.drawio.png)
+
+## How do I use it?
+
+### Frontend
+
+To obtain JWT token from Belo Oauth, you'll have to:
+
+1. Get challenge message from `/auth/start` endpoint
+
+```typescript Login.tsx
+interface WalletChallengeRequest {
+  address: string;
+}
+
+interface WalletChallenge {
+  challenge: string;
+}
+
+const getWalletChallenge = (data: WalletChallengeRequest) =>
+  client.post<WalletChallenge>(`auth/start`, data);
+```
+
+2. Display web3 wallet message sign dialogue for user to sign the challenge
+
+```typescript Login.tsx
+import { useSignTypedData } from "wagmi";
+
+const { signTypedDataAsync } = useSignTypedData();
+const message = JSON.parse(data.challenge);
+const types = message.types;
+const domain = message.domain;
+const value = message.message;
+const signature = await signTypedDataAsync({ types, domain, value });
+```
+
+3. POST signature to `/auth` endpoint
+
+```typescript Login.tsx
+interface SignMessageRequest {
+  address: string;
+  signature: string;
+  nonce: string;
+}
+
+interface TokenForm {
+  token: string;
+}
+
+const login = (data: SignMessageRequest) =>
+  client.post<TokenForm>(`auth`, data);
+```
+4. Social login :
+
+  + Google: POST google credential to `auth/google` endpoint
+
+  ```typescript SocialSignInButton.tsx
+  const token = (data: TokenForm) => 
+  client.post<TokenForm>('auth/google, data);
+  ```
+
+  + Apple login: POST apple code to `auth/apple` endpoint
+
+  ```typescript SocialSignInButton.tsx
+  const token = (data: TokenForm) => 
+  client.post<TokenForm>('auth/google, data);
+  ```
+
+
+
+Response contains JWT token you can use for communication with your backend service.
+It can be validated with HMAC algorithm by using the shared client secret.
+
+### Backend
+
+1. Verify token with secret key
+
+```typescript Index.js
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const cors = require("cors");
+
+const app = express();
+const PORT = 3000;
+app.use(express.json());
+app.use(cors());
+
+app.post("/verify", async (req, res) => {
+  const token = req.body.token;
+  try {
+    const result = jwt.verify(token, "Secret key");
+    res.send(result);
+  } catch (error) {
+    res.send(error);
+  }
+});
+
+app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
+
+```
+
+### Testing 
+
+1. Oauth service url: https://oauth.belo.im
+
+2. Login page demo: https://oauth-demo.belo.im
+
+3. Test jwt secret: ```eI6jlbXqS7OyEIWiFqrS```
+
+4. Demo code: https://gitlab.com/Hoangbim/oauth-demo.git
+
+5. Postman collection: https://www.postman.com/belo-oauth/workspace/belo-oauth/collection/34661997-53ce9c4b-c146-4ea1-b411-911714d318b4?action=share&creator=34661997
+

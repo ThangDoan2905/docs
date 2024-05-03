@@ -17,6 +17,12 @@
       "pages": [
         "introduction"
       ]
+    },
+    {
+      "group": "Belo Oauth",
+      "pages": [
+        "belo_openid"
+      ]
     }
   ],
   "footerSocials": {
