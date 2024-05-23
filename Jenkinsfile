@@ -1,13 +1,13 @@
 node {
     try {
-        stage('Build') {
-            echo 'Building...'
-            sh 'docker-compose build'
+        stage('Prepare') {
+            echo 'Preparing...'
+            sh 'npm install -g mintlify'
         }
 
         stage('Deploy') {
             echo 'Deploying...'
-            sh 'docker-compose up -d'
+            sh 'mintlify dev --port 3333'
         }
     } catch (Exception e) {
         throw e
