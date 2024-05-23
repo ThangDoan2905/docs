@@ -1,10 +1,10 @@
 pipeline {
     agent any
 
-    environment {
-        // Define the image name (local use only)
-        DOCKER_IMAGE = 'docs'
-    }
+    // environment {
+    //     // Define the image name (local use only)
+    //     DOCKER_IMAGE = 'docs'
+    // }
 
     stages {
         stage('Checkout') {
@@ -14,27 +14,26 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // Build the Docker image from the Dockerfile in the source code
-                    docker.build("${DOCKER_IMAGE}:${env.BUILD_NUMBER}")
-                }
-            }
-        }
+        // stage('Build Docker Image') {
+        //     steps {
+        //         script {
+        //             // Build the Docker image from the Dockerfile in the source code
+        //             docker.build("${DOCKER_IMAGE}:${env.BUILD_NUMBER}")
+        //         }
+        //     }
+        // }
 
         stage('Deploy') {
             steps {
                 script {
-                    // Write environment variables to a .env file if needed
-                    writeFile file: '.env', text: """
-                    BUILD_NUMBER=${env.BUILD_NUMBER}
-                    """
+                    // // Write environment variables to a .env file if needed
+                    // writeFile file: '.env', text: """
+                    // BUILD_NUMBER=${env.BUILD_NUMBER}
+                    // """
                     
                     // Deploy using Docker Compose
                     sh '''
-                    docker-compose down
-                    docker-compose up -d
+                    docker-compose up --build -d
                     '''
                 }
             }
