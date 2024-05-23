@@ -4,5 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
     ports:
       - "3333:3333"
